@@ -2,22 +2,22 @@
 
 /* Base theme variables */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #fefefe;
+  --foreground: #1e293b;
   --input-bg: #ffffff;
-  --input-foreground: #0b0b0b;
-  --input-border: #e5e7eb; /* gray-200 */
-  --placeholder-color: #9ca3af; /* gray-400 */
+  --input-foreground: #0f172a;
+  --input-border: #cbd5e1; /* slate-300 */
+  --placeholder-color: #64748b; /* slate-500 */
 }
 
 /* Theme helpers via classes so we can toggle programmatically */
 .theme-light {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #fefefe;
+  --foreground: #1e293b;
   --input-bg: #ffffff;
-  --input-foreground: #0b0b0b;
-  --input-border: #e5e7eb;
-  --placeholder-color: #9ca3af;
+  --input-foreground: #0f172a;
+  --input-border: #cbd5e1;
+  --placeholder-color: #64748b;
 }
 
 .theme-dark {

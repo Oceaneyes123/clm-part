@@ -390,7 +390,7 @@ export default function Home() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {forms.map((f, i) => (
-            <div key={f.id} className="bg-gradient-to-br from-white/60 to-gray-50 dark:from-gray-900/60 dark:to-gray-900/40 p-6 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-800">
+            <div key={f.id} className="bg-gradient-to-br from-gray-900/60 to-gray-900/40 p-6 rounded-2xl shadow-lg border border-gray-800">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <label className="flex flex-col text-sm w-full">
                   <span className="mb-1 font-medium">Name</span>
