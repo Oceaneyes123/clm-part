@@ -361,7 +361,7 @@ export default function Home() {
     <div className="min-h-screen py-8 px-6">
       <main className="max-w-6xl mx-auto">
         <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-semibold">Counsel Assignment</h1>
+          <h1 className="text-2xl font-semibold">Our Christian Life and Ministry Assignment</h1>
           <div className="flex items-center gap-3">
               <button onClick={handleExportPNGs} className="text-sm px-3 py-2 rounded-md bg-blue-600 text-white hover:bg-blue-700">
                 <i className="fa-solid fa-file-export mr-2" /> Export PNG(s)
