@@ -14,6 +14,108 @@ export default function Home() {
     location: "Main Hall",
   });
 
+  const NAMES = [
+    "Abel Damaso",
+    "Acel Bustamante",
+    "Adrian Aberde",
+    "Andrea Bustamante",
+    "Andrew Villanueva",
+    "Andrie Bustamante",
+    "Bartolome Dela Cerna",
+    "Bezalel Fabro",
+    "Carl Pechera",
+    "Carl Drake Gallego",
+    "Carlito Bustamante Jr.",
+    "Carmelita Estilo",
+    "Castil Bustamante",
+    "Cenny Gallego",
+    "Charles Pechera",
+    "Charms Pechera",
+    "Christian Drilon",
+    "Christian Damaso",
+    "Christine Dela Cerna",
+    "Christopher Dela Cerna",
+    "Clariza Dela Cerna",
+    "Claudia Dela Cerna",
+    "Cynthia Damaso",
+    "Danny Gallego",
+    "Debie Latumbo",
+    "Denise Asong",
+    "Dennis Sondia",
+    "Dhesa Sandoval",
+    "Elena Supapo",
+    "Erica Sandoval",
+    "Eunice Bustamante",
+    "Expedito Latumbo Jr.",
+    "Freza Fabro",
+    "Gemma Villanueva",
+    "Geode Damaso",
+    "Ilyza Sandoval",
+    "Janine Nillos",
+    "Jean Sondia",
+    "Jelou Virayo",
+    "Jocelyn Sondia",
+    "Joel Estilo",
+    "Jomilyn Sionosa",
+    "Jona Villamor",
+    "Jonas Drilon",
+    "Jonelyn Aberde",
+    "Josper Guardiano",
+    "Joy Panela",
+    "Juana Demetillo",
+    "Judah Huervana",
+    "Judith Drilon",
+    "Jun Drilon Sr.",
+    "Jun Drilon Jr.",
+    "Justine Fabro",
+    "Keziah Hena",
+    "Leannie Bustamante",
+    "Leonardo Fabay",
+    "Leonisa Bustamante",
+    "Liezel Jaleco",
+    "Limar Hena",
+    "Loren Huervana",
+    "Louie Jee Virayo",
+    "Macdevon Sandoval",
+    "Marcial Pechera",
+    "Maribeth Asong",
+    "Mario Villamor",
+    "Marisse Asong",
+    "Maryjean Domingo",
+    "May Jadulos",
+    "Merian Helera",
+    "Merlie Gallego",
+    "Mica Trisha Panela",
+    "Michael Panela",
+    "Micky Hope Panela",
+    "Mikyla Flores",
+    "Nelly Pechera",
+    "Nilo Valentino",
+    "Nimfa Fabay",
+    "Noly Damaso",
+    "Pearl Drilon",
+    "Rebecca Valentino",
+    "Renalyn Salinas",
+    "Retchil Sandoval",
+    "Reymank Villamor",
+    "Rohama Fabro",
+    "Rolly Sandoval",
+    "Rosana Virayo",
+    "Ryan Guardiano",
+    "Shara Fabro",
+    "Sheena Bustamante",
+    "Sherlyn Emnas",
+    "Shiela Bustamante",
+    "Tirzah Fabro",
+    "Zhamique Damaso",
+  ];
+
+  function suggestNames(value) {
+    if (!value) return [];
+    const v = value.toLowerCase();
+    return NAMES.filter((n) => n.toLowerCase().includes(v)).slice(0, 8);
+  }
+
   const [forms, setForms] = useState([emptyForm()]);
   const [submitted, setSubmitted] = useState(false);
   const [removedMap, setRemovedMap] = useState({});
@@ -117,25 +219,57 @@ export default function Home() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <label className="flex flex-col text-sm">
                     <span className="mb-1 font-medium">Name</span>
-                    <input
-                      name="name"
-                      value={forms[0].name}
-                      onChange={(e) => handleChange(0, e)}
-                      required
-                      className="px-3 py-2 rounded-lg focus:outline-none form-input"
-                      placeholder="Enter name"
-                    />
+                    <div className="relative">
+                        <input
+                        name="name"
+                        value={forms[0].name}
+                        onChange={(e) => handleChange(0, e)}
+                        required
+                        className="px-3 py-2 rounded-lg focus:outline-none form-input w-full"
+                        placeholder="Enter name"
+                        autoComplete="off"
+                      />
+                      {forms[0].name && (
+                        <ul className="absolute z-10 mt-1 w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md max-h-40 overflow-auto text-sm">
+                          {suggestNames(forms[0].name).map((s) => (
+                            <li
+                              key={s}
+                              onClick={() => handleChange(0, { target: { name: "name", value: s } })}
+                              className="px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"
+                            >
+                              {s}
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </div>
                   </label>
 
                   <label className="flex flex-col text-sm">
                     <span className="mb-1 font-medium">Assistant</span>
-                    <input
-                      name="assistant"
-                      value={forms[0].assistant}
-                      onChange={(e) => handleChange(0, e)}
-                      className="px-3 py-2 rounded-lg focus:outline-none form-input"
-                      placeholder="Assistant name"
-                    />
+                    <div className="relative">
+                        <input
+                        name="assistant"
+                        value={forms[0].assistant}
+                        onChange={(e) => handleChange(0, e)}
+                        className="px-3 py-2 rounded-lg focus:outline-none form-input w-full"
+                        placeholder="Assistant name"
+                        autoComplete="off"
+                      />
+                      {forms[0].assistant && (
+                        <ul className="absolute z-10 mt-1 w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md max-h-40 overflow-auto text-sm">
+                          {suggestNames(forms[0].assistant).map((s) => (
+                            <li
+                              key={s}
+                              onClick={() => handleChange(0, { target: { name: "assistant", value: s } })}
+                              className="px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"
+                            >
+                              {s}
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </div>
                   </label>
 
                   <label className="flex flex-col text-sm">
@@ -144,8 +278,8 @@ export default function Home() {
                       type="date"
                       name="date"
                       value={forms[0].date}
-                      onChange={(e) => handleChange(0, e)}
-                      className="px-3 py-2 rounded-lg focus:outline-none"
+                        onChange={(e) => handleChange(0, e)}
+                        className="px-3 py-2 rounded-lg focus:outline-none w-full"
                     />
                   </label>
 
@@ -154,8 +288,8 @@ export default function Home() {
                     <select
                       name="location"
                       value={forms[0].location}
-                      onChange={(e) => handleChange(0, e)}
-                      className="px-3 py-2 rounded-lg focus:outline-none"
+                        onChange={(e) => handleChange(0, e)}
+                        className="px-3 py-2 rounded-lg focus:outline-none w-full"
                     >
                       <option>Main Hall</option>
                       <option>Auxiliary Classroom 1</option>
@@ -222,25 +356,57 @@ export default function Home() {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <label className="flex flex-col text-sm">
                       <span className="mb-1 font-medium">Name</span>
-                      <input
-                        name="name"
-                        value={f.name}
-                        onChange={(e) => handleChange(i, e)}
-                        required
-                        className="px-3 py-2 rounded-lg focus:outline-none form-input"
-                        placeholder="Enter name"
-                      />
+                      <div className="relative">
+                          <input
+                          name="name"
+                          value={f.name}
+                          onChange={(e) => handleChange(i, e)}
+                          required
+                            className="px-3 py-2 rounded-lg focus:outline-none form-input w-full"
+                          placeholder="Enter name"
+                          autoComplete="off"
+                        />
+                        {f.name && (
+                          <ul className="absolute z-10 mt-1 w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md max-h-40 overflow-auto text-sm">
+                            {suggestNames(f.name).map((s) => (
+                              <li
+                                key={s}
+                                onClick={() => handleChange(i, { target: { name: "name", value: s } })}
+                                className="px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"
+                              >
+                                {s}
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                      </div>
                     </label>
 
                     <label className="flex flex-col text-sm">
                       <span className="mb-1 font-medium">Assistant</span>
-                      <input
-                        name="assistant"
-                        value={f.assistant}
-                        onChange={(e) => handleChange(i, e)}
-                        className="px-3 py-2 rounded-lg focus:outline-none form-input"
-                        placeholder="Assistant name"
-                      />
+                      <div className="relative">
+                          <input
+                          name="assistant"
+                          value={f.assistant}
+                          onChange={(e) => handleChange(i, e)}
+                          className="px-3 py-2 rounded-lg focus:outline-none form-input w-full"
+                          placeholder="Assistant name"
+                          autoComplete="off"
+                        />
+                        {f.assistant && (
+                          <ul className="absolute z-10 mt-1 w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md max-h-40 overflow-auto text-sm">
+                            {suggestNames(f.assistant).map((s) => (
+                              <li
+                                key={s}
+                                onClick={() => handleChange(i, { target: { name: "assistant", value: s } })}
+                                className="px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"
+                              >
+                                {s}
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                      </div>
                     </label>
 
                     <label className="flex flex-col text-sm">
@@ -249,8 +415,8 @@ export default function Home() {
                         type="date"
                         name="date"
                         value={f.date}
-                        onChange={(e) => handleChange(i, e)}
-                        className="px-3 py-2 rounded-lg focus:outline-none"
+                          onChange={(e) => handleChange(i, e)}
+                          className="px-3 py-2 rounded-lg focus:outline-none w-full"
                       />
                     </label>
 
@@ -259,8 +425,8 @@ export default function Home() {
                       <select
                         name="location"
                         value={f.location}
-                        onChange={(e) => handleChange(i, e)}
-                        className="px-3 py-2 rounded-lg focus:outline-none"
+                          onChange={(e) => handleChange(i, e)}
+                          className="px-3 py-2 rounded-lg focus:outline-none w-full"
                       >
                         <option>Main Hall</option>
                         <option>Auxiliary Classroom 1</option>
