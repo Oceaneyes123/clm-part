@@ -12,9 +12,9 @@
 
 /* Theme helpers via classes so we can toggle programmatically */
 .theme-light {
-  --background: #fefefe;
+  --background: #e9e9e9;
   --foreground: #1e293b;
-  --input-bg: #ffffff;
+  --input-bg: #fafafa;
   --input-foreground: #0f172a;
   --input-border: #cbd5e1;
   --placeholder-color: #64748b;

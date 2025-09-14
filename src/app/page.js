@@ -390,7 +390,7 @@ export default function Home() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {forms.map((f, i) => (
-            <div key={f.id} className="bg-gradient-to-br from-gray-900/60 to-gray-900/40 p-6 rounded-2xl shadow-lg border border-gray-800">
+            <div key={f.id} className={`p-6 rounded-2xl shadow-lg border transition-all duration-200 hover:shadow-xl hover:-translate-y-1 ${theme === 'light' ? 'bg-white border-gray-200' : 'bg-gradient-to-br from-gray-900/60 to-gray-900/40 border-gray-800'}`}>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <label className="flex flex-col text-sm w-full">
                   <span className="mb-1 font-medium">Name</span>
@@ -407,7 +407,7 @@ export default function Home() {
                       autoComplete="off"
                     />
                     {f.showNameDropdown && f.name && (
-                      <ul className="absolute z-10 mt-1 w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md max-h-40 overflow-auto text-sm">
+                      <ul className={`absolute z-10 mt-1 w-full border rounded-md max-h-40 overflow-auto text-sm ${theme === 'light' ? 'bg-gray-50 border-gray-200' : 'bg-gray-800 border-gray-700'}`}>
                         {suggestNames(f.name).map((s) => (
                           <li
                             key={s}
@@ -464,7 +464,7 @@ export default function Home() {
                     name="date"
                     value={f.date}
                     onChange={(e) => handleChange(i, e)}
-                    className="px-3 py-2 rounded-lg focus:outline-none w-full"
+                    className="px-3 py-2 rounded-lg focus:outline-none form-input w-full"
                   />
                 </label>
 
@@ -474,7 +474,7 @@ export default function Home() {
                     name="location"
                     value={f.location}
                     onChange={(e) => handleChange(i, e)}
-                    className="px-3 py-2 rounded-lg focus:outline-none w-full"
+                    className="px-3 py-2 rounded-lg focus:outline-none form-input w-full"
                   >
                     <option>Main Hall</option>
                     <option>Auxiliary Classroom 1</option>
@@ -490,7 +490,7 @@ export default function Home() {
                     value={f.counselPoint}
                     onChange={(e) => handleChange(i, e)}
                     rows={3}
-                    className="px-3 py-2 rounded-lg focus:outline-none"
+                    className="px-3 py-2 rounded-lg focus:outline-none form-input"
                     placeholder="Enter the counsel point"
                   />
                 </label>
@@ -502,7 +502,7 @@ export default function Home() {
                     value={f.assignment}
                     onChange={(e) => handleChange(i, e)}
                     rows={3}
-                    className="px-3 py-2 rounded-lg focus:outline-none"
+                    className="px-3 py-2 rounded-lg focus:outline-none form-input"
                     placeholder="Describe the assignment"
                   />
                 </label>
