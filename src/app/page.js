@@ -11,6 +11,8 @@ export default function Home() {
     counselPoint: "",
     assignment: "",
     location: "Main Hall",
+    showNameDropdown: false,
+    showAssistantDropdown: false,
   });
 
   const NAMES = [
@@ -168,12 +170,189 @@ export default function Home() {
 
   const duplicateLast = () => setForms((prev) => [...prev, emptyForm()]);
 
-  const handleDownload = () => {
-    const blob = new Blob([JSON.stringify(forms, null, 2)], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
+  // Generate PDF, render to PNG (3:4 ratio), download PNG or ZIP if multiple
+  const handleExportPNGs = async () => {
+    if (!forms || forms.length === 0) return;
+
+    // Load pdfjs-dist dynamically from CDN to avoid npm build issues
+    if (!window.pdfjsLib) {
+      const script = document.createElement('script');
+      script.src = 'https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.min.js';
+      await new Promise((resolve, reject) => {
+        script.onload = resolve;
+        script.onerror = reject;
+        document.head.appendChild(script);
+      });
+    }
+
+    // dynamic import for jsPDF and JSZip
+    const [{ jsPDF }, JSZip] = await Promise.all([
+      import('jspdf'),
+      import('jszip'),
+    ]);
+
+    // Helper: create a PDF document for a single form
+    const createPdfBlob = (f) => {
+      const doc = new jsPDF({ unit: 'pt', format: [216, 324] }); // 3 inches x 4.5 inches
+
+      // Draw title centered, on two lines
+      const pageWidth = doc.internal.pageSize.getWidth();
+      let y = 30;
+      doc.setFontSize(12);
+      doc.setFont('helvetica', 'bold');
+      const titleLine1 = 'Our Christian Life and Ministry';
+      const titleLine2 = 'Meeting Assignment';
+      doc.text(titleLine1, pageWidth / 2, y, { align: 'center' });
+      y += 15;
+      doc.text(titleLine2, pageWidth / 2, y, { align: 'center' });
+
+      doc.setFontSize(12);
+      y += 30; // More margin at bottom of title
+
+      // Each field: label on one line, value indented on next
+      const lineHeight = 13;
+      const blockSpacing = 30;
+
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Name:', 20, y);
+      y += lineHeight;
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(12);
+      doc.text(f.name || 'John Doe', 40, y);
+      y += blockSpacing;
+
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(10);
+      doc.text('Assistant:', 20, y);
+      y += lineHeight;
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(12);
+      doc.text(f.assistant || 'Jane Doe', 40, y);
+      y += blockSpacing;
+
+      // format date as MM-DD-YYYY
+      const formatDate = (d) => {
+        if (!d) return new Date().toLocaleDateString('en-US');
+        // if input is YYYY-MM-DD (from <input type=date>), convert
+        const parts = d.split('-');
+        if (parts.length === 3) return `${parts[1]}-${parts[2]}-${parts[0]}`;
+        return d;
+      };
+      const dateStr = formatDate(f.date);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(10);
+      doc.text('Date:', 20, y);
+      y += lineHeight;
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(12);
+      doc.text(dateStr, 40, y);
+      y += blockSpacing;
+
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(10);
+      doc.text('To Be Given In:', 20, y);
+      y += lineHeight;
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(12);
+      doc.text(f.location || 'Main Hall', 40, y);
+      y += blockSpacing;
+
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Counsel Point:', 20, y);
+      y += lineHeight;
+      doc.setFontSize(12);
+      doc.setFont('helvetica', 'normal');
+      const counselLines = doc.splitTextToSize(f.counselPoint || 'Lorem Ipsum', pageWidth - 60);
+      doc.text(counselLines, 40, y);
+      y += blockSpacing;
+
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Assignment:', 20, y);
+      y += lineHeight;
+      doc.setFontSize(11);
+      doc.setFont('helvetica', 'normal');
+      const assignmentLines = doc.splitTextToSize(f.assignment || 'Lorem Ipsum', pageWidth - 60);
+      doc.text(assignmentLines, 40, y);
+
+      return doc.output('blob');
+    };
+
+    // Render PDF blob first page into PNG with 3:4 ratio
+    const renderPdfBlobToPng = async (pdfBlob) => {
+      const arrayBuffer = await pdfBlob.arrayBuffer();
+      const loadingTask = window.pdfjsLib.getDocument({ data: arrayBuffer });
+      const pdf = await loadingTask.promise;
+      const page = await pdf.getPage(1);
+
+      // Desired ratio 3:4.5 (width:height). We'll pick a reasonable width for high quality
+      const canvasWidth = 900; // 3 parts
+      const canvasHeight = Math.round((canvasWidth * 4.5) / 3); // 4.5 parts
+
+      // Get viewport at scale=1 to compute natural size, then compute scale to fit into our target
+      const viewport = page.getViewport({ scale: 1 });
+      const scale = Math.min(canvasWidth / viewport.width, canvasHeight / viewport.height);
+      const scaledViewport = page.getViewport({ scale });
+
+      const drawWidth = Math.round(scaledViewport.width);
+      const drawHeight = Math.round(scaledViewport.height);
+
+      // Render into a temporary canvas exactly the size of the rendered PDF page
+      const tmpCanvas = document.createElement('canvas');
+      tmpCanvas.width = drawWidth;
+      tmpCanvas.height = drawHeight;
+      const tmpCtx = tmpCanvas.getContext('2d');
+
+      await page.render({ canvasContext: tmpCtx, viewport: scaledViewport }).promise;
+
+      // Final canvas with desired 3:4 ratio and white background
+      const canvas = document.createElement('canvas');
+      canvas.width = canvasWidth;
+      canvas.height = canvasHeight;
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // draw the rendered PDF page centered on the final canvas
+      const offsetX = Math.round((canvasWidth - drawWidth) / 2);
+      const offsetY = Math.round((canvasHeight - drawHeight) / 2);
+      ctx.drawImage(tmpCanvas, offsetX, offsetY, drawWidth, drawHeight);
+
+      // Export to PNG
+      return new Promise((resolve) => {
+        canvas.toBlob((b) => resolve(b), 'image/png', 0.95);
+      });
+    };
+
+    // Process all forms sequentially and collect PNG blobs
+    const pngs = [];
+    for (let f of forms) {
+      const pdfBlob = await createPdfBlob(f);
+      const pngBlob = await renderPdfBlobToPng(pdfBlob);
+      pngs.push({ name: `${(f.name||'form').replace(/[^a-z0-9]/gi,'_') || 'form'}.png`, blob: pngBlob });
+    }
+
+    if (pngs.length === 1) {
+      const url = URL.createObjectURL(pngs[0].blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = pngs[0].name;
+      a.click();
+      URL.revokeObjectURL(url);
+      return;
+    }
+
+    // Multiple: create zip
+  const ZipClass = JSZip.default || JSZip;
+  const zip = new ZipClass();
+    pngs.forEach((p) => zip.file(p.name, p.blob));
+    const zipBlob = await zip.generateAsync({ type: 'blob' });
+    const url = URL.createObjectURL(zipBlob);
+    const a = document.createElement('a');
     a.href = url;
-    a.download = "forms.json";
+    a.download = 'forms_pngs.zip';
     a.click();
     URL.revokeObjectURL(url);
   };
@@ -184,8 +363,8 @@ export default function Home() {
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-2xl font-semibold">Counsel Assignment</h1>
           <div className="flex items-center gap-3">
-              <button onClick={handleDownload} className="text-sm px-3 py-2 rounded-md bg-green-600 text-white hover:bg-green-700">
-                <i className="fa-solid fa-download mr-2" /> Download
+              <button onClick={handleExportPNGs} className="text-sm px-3 py-2 rounded-md bg-blue-600 text-white hover:bg-blue-700">
+                <i className="fa-solid fa-file-export mr-2" /> Export PNG(s)
               </button>
 
               {/* Theme toggle switch: sun / moon with sliding knob */}
@@ -220,17 +399,22 @@ export default function Home() {
                       name="name"
                       value={f.name}
                       onChange={(e) => handleChange(i, e)}
+                      onFocus={() => setForms(prev => { const copy = [...prev]; copy[i].showNameDropdown = true; return copy; })}
+                      onBlur={() => setTimeout(() => setForms(prev => { const copy = [...prev]; copy[i].showNameDropdown = false; return copy; }), 150)}
                       required
                       className="px-3 py-2 rounded-lg focus:outline-none form-input w-full"
                       placeholder="Enter name"
                       autoComplete="off"
                     />
-                    {f.name && (
+                    {f.showNameDropdown && f.name && (
                       <ul className="absolute z-10 mt-1 w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md max-h-40 overflow-auto text-sm">
                         {suggestNames(f.name).map((s) => (
                           <li
                             key={s}
-                            onClick={() => handleChange(i, { target: { name: "name", value: s } })}
+                            onClick={() => {
+                              handleChange(i, { target: { name: "name", value: s } });
+                              setForms(prev => { const copy = [...prev]; copy[i].showNameDropdown = false; return copy; });
+                            }}
                             className="px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"
                           >
                             {s}
@@ -248,16 +432,21 @@ export default function Home() {
                       name="assistant"
                       value={f.assistant}
                       onChange={(e) => handleChange(i, e)}
+                      onFocus={() => setForms(prev => { const copy = [...prev]; copy[i].showAssistantDropdown = true; return copy; })}
+                      onBlur={() => setTimeout(() => setForms(prev => { const copy = [...prev]; copy[i].showAssistantDropdown = false; return copy; }), 150)}
                       className="px-3 py-2 rounded-lg focus:outline-none form-input w-full"
                       placeholder="Assistant name"
                       autoComplete="off"
                     />
-                    {f.assistant && (
+                    {f.showAssistantDropdown && f.assistant && (
                       <ul className="absolute z-10 mt-1 w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md max-h-40 overflow-auto text-sm">
                         {suggestNames(f.assistant).map((s) => (
                           <li
                             key={s}
-                            onClick={() => handleChange(i, { target: { name: "assistant", value: s } })}
+                            onClick={() => {
+                              handleChange(i, { target: { name: "assistant", value: s } });
+                              setForms(prev => { const copy = [...prev]; copy[i].showAssistantDropdown = false; return copy; });
+                            }}
                             className="px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"
                           >
                             {s}
